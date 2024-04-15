@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device Management | Cryptographic Device Show</title>
+    <link rel="stylesheet" href="devices.css">
+    <link rel="stylesheet" href="nav.css">
+</head>
+<body>
+    <nav>
+        <div class="nav">
+            <h1><a href="/">Cryptographic Device Show</a></h1>
+            <ul>
+                <li><a href="/login.html">Login</a></li>
+                <li><a href="/events.html">Events</a></li>
+                <li><a href="/devices.html">Devices</a></li>
+                <li><a href="/edit.html">Profile</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        <h2>Device Management</h2>
+
+        <!-- Add Device Button -->
+        <button id="addDeviceBtn" class="add-device-btn">Add Device</button>
+
+         <!-- Add Device Modal -->
+        <div id="addDeviceModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h3>Add a New Device</h3>
+                <form id="addDeviceForm">
+                    <div class="form-group">
+                        <label for="deviceName">Device Name:</label>
+                        <input type="text" id="deviceName" name="deviceName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="deviceType">Device Type:</label>
+                        <select id="deviceType" name="deviceType" required>
+                            <option value="Legacy">Legacy</option>
+                            <option value="Modern">Modern</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="deviceImage">Device Image URL:</label>
+                        <input type="file" id="deviceImage" name="deviceImage" accept="image/*" required>
+                    </div>
+                    <button type="submit">Add Device</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Filter and Search -->
+        <div class="filter-search">
+            <select id="filterType">
+                <option value="All">All Devices</option>
+                <option value="Legacy">Legacy Devices</option>
+                <option value="Modern">Modern Devices</option>
+                <option value="Archived">Archived Devices</option>
+            </select>
+            <input type="text" id="searchInput" placeholder="Search by device name">
+        </div>
+
+        <!-- Devices List -->
+        <div id="devicesList" class="devices-list">
+            <!-- Devices will be displayed here -->
+            <!-- Example Device -->
+            <div class="device-item">
+                <img src="images/enigma.jpg" alt="Enigma Machine" class="device-image">
+                <h4>Enigma Machine</h4>
+                <p>Type: Legacy</p>
+                <button class="view-details" data-id="enigma">View Details</button>
+                <button class="edit-device" data-id="enigma">Edit</button>
+                <button class="archive-device" data-id="enigma">Archive</button>
+                <button class="register-event" data-id="enigma">Register for Event</button>
+            </div>
+            <!-- Add more devices as needed -->
+        </div>
+
+        <!-- Device Details Modal -->
+        <div id="deviceDetailsModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h3 id="deviceModalTitle"></h3>
+                <p id="deviceModalType"></p>
+                <img id="deviceModalImage" src="" alt="" class="device-image">
+                <!-- Additional details can be added here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const filterType = document.getElementById('filterType');
+            const searchInput = document.getElementById('searchInput');
+            const devicesList = document.getElementById('devicesList');
+            const deviceDetailsModal = document.getElementById('deviceDetailsModal');
+            const deviceModalTitle = document.getElementById('deviceModalTitle');
+            const deviceModalType = document.getElementById('deviceModalType');
+            const deviceModalImage = document.getElementById('deviceModalImage');
+            const modalClose = document.querySelector('.close');
+
+            const addDeviceBtn = document.getElementById('addDeviceBtn');
+    const addDeviceModal = document.getElementById('addDeviceModal');
+    const closeAddDeviceModal = document.querySelector('#addDeviceModal .close');
+    const addDeviceForm = document.getElementById('addDeviceForm');
+
+    // Show Add Device Modal
+    addDeviceBtn.addEventListener('click', () => {
+        addDeviceModal.style.display = 'block';
+    });
+
+    // Close Add Device Modal
+    closeAddDeviceModal.addEventListener('click', () => {
+        addDeviceModal.style.display = 'none';
+    });
+
+    // Close modal when clicking outside the modal content
+    window.addEventListener('click', (e) => {
+        if (e.target === addDeviceModal) {
+            addDeviceModal.style.display = 'none';
+        }
+    });
+
+    // Form submission handling
+    addDeviceForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        })
+
+            // Dummy devices data
+            const devices = [
+                { id: 'enigma', name: 'Enigma Machine', type: 'Legacy', image: 'enigma.jpg' },
+                { id: 'rubberducky', name: 'Rubber Ducky', type: 'Modern', image: 'rubberducky.jpg' }
+            ];
+
+            // Display devices
+            const displayDevices = (devicesArray) => {
+                devicesList.innerHTML = '';
+                devicesArray.forEach(device => {
+                    const deviceItem = document.createElement('div');
+                    deviceItem.className = 'device-item';
+                    deviceItem.innerHTML = `
+                        <img src="images/${device.image}" alt="${device.name}" class="device-image">
+                        <h4>${device.name}</h4>
+                        <p>Type: ${device.type}</p>
+                        <button class="view-details" data-id="${device.id}">View Details</button>
+                        <button class="edit-device" data-id="${device.id}">Edit</button>
+                        <button class="archive-device" data-id="${device.id}">Archive</button>
+                        <button class="register-event" data-id="${device.id}">Register for Event</button>
+                    `;
+                    devicesList.appendChild(deviceItem);
+                });
+            };
+
+            // Filter and Search
+            filterType.addEventListener('change', () => {
+                const selectedType = filterType.value;
+                let filteredDevices = devices;
+
+                if (selectedType !== 'All') {
+                    filteredDevices = devices.filter(device => device.type === selectedType);
+                }
+
+                displayDevices(filteredDevices);
+            });
+
+            searchInput.addEventListener('input', () => {
+                const searchTerm = searchInput.value.toLowerCase();
+                const filteredDevices = devices.filter(device => device.name.toLowerCase().includes(searchTerm));
+                displayDevices(filteredDevices);
+            });
+
+            // Event listeners for buttons
+            devicesList.addEventListener('click', (e) => {
+                const deviceId = e.target.getAttribute('data-id');
+                
+                if (e.target.classList.contains('view-details')) {
+                    const device = devices.find(d => d.id === deviceId);
+                    deviceModalTitle.textContent = device.name;
+                    deviceModalType.textContent = `Type: ${device.type}`;
+                    deviceModalImage.src = `images/${device.image}`;
+                    deviceDetailsModal.style.display = 'block';
+                }
+
+                // Add more event listeners for edit, archive, register buttons as needed
+            });
+
+            modalClose.addEventListener('click', () => {
+                deviceDetailsModal.style.display = 'none';
+            });
+
+            window.addEventListener('click', (e) => {
+                if (e.target === deviceDetailsModal) {
+                    deviceDetailsModal.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
